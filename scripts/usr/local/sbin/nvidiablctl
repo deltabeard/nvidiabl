@@ -17,7 +17,7 @@
 #   used to endorse or promote products derived from this software without specific
 #   prior written permission.
 
-backlights_path='/sys/class/backlight/nvidia_backlight'
+backlights_path='/sys/class/backlight/nv_backlight'
 max_brightness="$(< ${backlights_path}/max_brightness)"
 current_brightness="$(< ${backlights_path}/actual_brightness)"
 

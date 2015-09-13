@@ -6,7 +6,7 @@
  * Based on the mechanism discovered by the author of NvClock:
  * Copyright (c) 2001-2009 Roderick Colenbrander
  *     Site: http://nvclock.sourceforge.net
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -63,12 +63,12 @@ struct backlight_type_id {
 	enum backlight_type type;
 };
 
-static const struct backlight_type_id backlight_type_ids[] = { 
+static const struct backlight_type_id backlight_type_ids[] = {
 	{ "raw", BACKLIGHT_RAW },
 	{ "platform", BACKLIGHT_PLATFORM },
 	{ "firmware", BACKLIGHT_FIRMWARE }
 };
-  
+
 static char bl_type[BL_TYPE_SIZE]= "raw";
 module_param_string(type, bl_type, BL_TYPE_SIZE, 0644);
 MODULE_PARM_DESC(type, "Backlight type (raw|platform|firmware) default is raw");
@@ -102,9 +102,9 @@ static int nvidiabl_dmi_match(const struct dmi_system_id *id)
 {
         nvidiabl_descriptor *desc;
         printk(KERN_INFO "nvidiabl: %s model detected in DMI tables\n", id->ident);
-        
+
         desc = (nvidiabl_descriptor *)(id->driver_data);
-        
+
         pci_id = desc->pci_device_code;
         if (off == NVIDIABL_UNSET)
                 off = desc->off;
@@ -118,7 +118,7 @@ static int nvidiabl_dmi_match(const struct dmi_system_id *id)
 }
 
 static const struct dmi_system_id /* __initdata */ nvidiabl_dmi_table[] = {
-  
+
 #include "nvidiabl-laptops.h"
 
         /* end of list */
@@ -181,38 +181,38 @@ static int __init nvidiabl_init(void)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,34)
         struct backlight_properties props;
 #endif
-        
+
 	/* Bail-out if PCI subsystem is not initialized */
 	if (no_pci_devices())
 		return -ENODEV;
 
 	printk(KERN_INFO "nvidiabl: loading driver version " NVIDIABL_VERSION_STR "\n");
-	
+
 	/* Check DMI whether we need to ignore some device */
 	dmi_check_system(nvidiabl_ignore_table);
-        
+
         /* Check DMI whether we have a known system */
         dmi_check_system(nvidiabl_dmi_table);
 
         err = nvidiabl_find_device(&driver_data, pci_id, nvidiabl_ignore_device);
         if (err)
                 return err;
-        
+
         nvidiabl_force_model(&driver_data);
 
         if ((screen_type != NVIDIABL_DEFAULT) && (screen_type != NVIDIABL_UNSET))
                 driver_data->screen_type = screen_type;
-	
+
         /* Map smartdimmer */
 	err = driver_data->map(driver_data);
 	if (err)
 		return err;
-        
+
 	/* Register at backlight framework */
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,34)
         memset(&props, 0, sizeof(struct backlight_properties));
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,39)
-	
+
 	for (iii = 0 ; iii < sizeof(backlight_type_ids) ; iii++) {
 		if (strnicmp(bl_type, backlight_type_ids[iii].id, sizeof(bl_type)) == 0) {
 			props.type = backlight_type_ids[iii].type;
@@ -220,16 +220,16 @@ static int __init nvidiabl_init(void)
 		}
 	}
 #endif
-	nvidiabl_device = backlight_device_register("nvidia_backlight", NULL,
+	nvidiabl_device = backlight_device_register("nv_backlight", NULL,
 	                                             driver_data,
 	                                             &driver_data->backlight_ops,
 	                                             &props);
 #else
-        nvidiabl_device = backlight_device_register("nvidia_backlight", NULL,
+        nvidiabl_device = backlight_device_register("nv_backlight", NULL,
                                                      driver_data,
                                                      &driver_data->backlight_ops);
 #endif
-                                                     
+
 	if (IS_ERR(nvidiabl_device)) {
 		driver_data->unmap(driver_data);
 		return PTR_ERR(nvidiabl_device);
@@ -243,26 +243,26 @@ static int __init nvidiabl_init(void)
 	else if (max != NVIDIABL_DEFAULT) {
                 driver_data->max = max;
 	}
-          
+
         if (driver_data->max == NVIDIABL_AUTO) {
                 printk(KERN_INFO "nvidiabl: autodetecting maximum\n");
                 driver_data->max = driver_data->autodetect(driver_data, T_NVIDIABL_MAX);
         }
         printk(KERN_INFO "nvidiabl: using value 0x%x as maximum\n", driver_data->max);
 
-        
+
 	if (off == NVIDIABL_UNSET) {
 		driver_data->off = NVIDIABL_AUTO;
 	}
 	else if (off != NVIDIABL_DEFAULT) {
                 driver_data->off = off;
-	} 
+	}
 
         if (driver_data->off == NVIDIABL_AUTO) {
                 printk(KERN_INFO "nvidiabl: autodetecting off\n");
                 driver_data->off = driver_data->autodetect(driver_data, T_NVIDIABL_OFF);
         }
-        
+
         if (driver_data->off < 0) {
                 printk(KERN_INFO "nvidiabl: off is %d%% of maximum\n", -1 * driver_data->off);
                 calc = driver_data->max * (-1 * driver_data->off);
@@ -274,7 +274,7 @@ static int __init nvidiabl_init(void)
 
         if (min == NVIDIABL_UNSET) {
                 driver_data->min = NVIDIABL_AUTO;
-        } 
+        }
         else if (min != NVIDIABL_DEFAULT) {
                 driver_data->min = min;
         }
@@ -283,7 +283,7 @@ static int __init nvidiabl_init(void)
                 printk(KERN_INFO "nvidiabl: autodetecting minimum\n");
                 driver_data->min = driver_data->autodetect(driver_data, T_NVIDIABL_MIN);
         }
-        
+
         if (driver_data->min < 0) {
                 printk(KERN_INFO "nvidiabl: minimum is %d%% of maximum\n", -1 * driver_data->min);
                 calc = driver_data->max * (-1 * driver_data->min);
@@ -291,8 +291,8 @@ static int __init nvidiabl_init(void)
                 driver_data->min = calc;
         }
         printk(KERN_INFO "nvidiabl: using value 0x%x as minimum\n", driver_data->min);
-        
-        
+
+
         /* Set up backlight device */
         nvidiabl_device->props.max_brightness = FB_BACKLIGHT_LEVELS - 1;
 	nvidiabl_device->props.brightness =
@@ -308,7 +308,7 @@ static void __exit nvidiabl_exit(void)
 #endif
 {
         driver_data->restore(driver_data);
-        
+
 	/* Unregister at backlight framework */
 	if (nvidiabl_device)
 		backlight_device_unregister(nvidiabl_device);
@@ -350,7 +350,7 @@ static struct platform_device *nvidiabl_platform_device;
 static int __init nvidiabl_init(void)
 {
 	int err;
-	
+
 	err = platform_driver_register(&nvidiabl_driver);
 	if (err)
 		return err;
